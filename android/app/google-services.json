@@ -1,0 +1,82 @@
+{
+  "project_info": {
+    "project_number": "387859511366",
+    "project_id": "water-tracker-acbfb",
+    "storage_bucket": "water-tracker-acbfb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:387859511366:android:eebdc5316c6dce676bb247",
+        "android_client_info": {
+          "package_name": "com.example.watertracker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "387859511366-krof544ah846du71jektnh7vh8r8vdcd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB2XEcytvvf7udd5f1_c2t6XsjFAN7rUG0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "387859511366-krof544ah846du71jektnh7vh8r8vdcd.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "387859511366-3hu8iigg7sj9h472dbohbmjbsppsohv5.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.watertracker"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:387859511366:android:468d0c38d83221ae6bb247",
+        "android_client_info": {
+          "package_name": "com.watertracker.sipsip"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "387859511366-krof544ah846du71jektnh7vh8r8vdcd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB2XEcytvvf7udd5f1_c2t6XsjFAN7rUG0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "387859511366-krof544ah846du71jektnh7vh8r8vdcd.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "387859511366-3hu8iigg7sj9h472dbohbmjbsppsohv5.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.watertracker"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
