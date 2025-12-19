@@ -5,9 +5,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
   static String get baseUrl {
-    if (kIsWeb) return 'http://127.0.0.1:5000/api';
-    if (Platform.isAndroid) return 'http://192.168.1.115:5000/api';
-    return 'http://127.0.0.1:5000/api'; // iOS/Desktop
+    // Production Vercel URL
+    return 'https://water-tracker-sipsip.vercel.app/api';
+    
+    // Previous local development URLs (for reference)
+    // if (kIsWeb) return 'http://127.0.0.1:5000/api';
+    // if (Platform.isAndroid) return 'http://192.168.1.115:5000/api';
+    // return 'http://127.0.0.1:5000/api'; 
   } 
   
   final Dio _dio = Dio(BaseOptions(
