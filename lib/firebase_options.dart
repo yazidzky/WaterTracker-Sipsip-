@@ -64,7 +64,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '387859511366',
     projectId: 'water-tracker-acbfb',
     storageBucket: 'water-tracker-acbfb.firebasestorage.app',
-    iosBundleId: 'com.example.watertracker',
+    iosBundleId: 'com.sipsip.watertracker',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
@@ -73,7 +73,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '387859511366',
     projectId: 'water-tracker-acbfb',
     storageBucket: 'water-tracker-acbfb.firebasestorage.app',
-    iosBundleId: 'com.example.watertracker',
+    iosBundleId: 'com.sipsip.watertracker',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(

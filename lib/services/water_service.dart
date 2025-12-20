@@ -22,7 +22,7 @@ class WaterService {
       final response = await _apiService.dio.post('/water', data: {
         'amount': amount,
         'type': type,
-        'date': intakeDate.toIso8601String(),
+        'date': intakeDate.toUtc().toIso8601String(),
       });
       
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -47,7 +47,14 @@ class WaterService {
   Future<Map<String, dynamic>?> getTodayIntake() async {
     // 1. Try to get from server to stay updated
     try {
-      final response = await _apiService.dio.get('/water/today');
+      final now = DateTime.now();
+      final startOfDay = DateTime(now.year, now.month, now.day);
+      final endOfDay = DateTime(now.year, now.month, now.day, 23, 59, 59, 999);
+
+      final response = await _apiService.dio.get('/water/today', queryParameters: {
+        'startDate': startOfDay.toUtc().toIso8601String(),
+        'endDate': endOfDay.toUtc().toIso8601String(),
+      });
       if (response.data != null) {
         final data = Map<String, dynamic>.from(response.data);
         // Cache intakes
@@ -74,8 +81,8 @@ class WaterService {
     final String cacheKey = 'stats_${start?.toIso8601String() ?? 'all'}_${end?.toIso8601String() ?? 'all'}';
     try {
       final response = await _apiService.dio.get('/water/stats', queryParameters: {
-        if (start != null) 'startDate': start.toIso8601String(),
-        if (end != null) 'endDate': end.toIso8601String(),
+        if (start != null) 'startDate': start.toUtc().toIso8601String(),
+        if (end != null) 'endDate': end.toUtc().toIso8601String(),
       });
       if (response.data != null) {
         final stats = List<dynamic>.from(response.data);
@@ -131,6 +138,15 @@ class WaterService {
         final localKey = item['local_key'];
         // Remove local_key before sending to server
         final syncData = Map<String, dynamic>.from(item)..remove('local_key')..remove('isPending');
+        
+        // Ensure date is UTC
+        if (syncData['date'] is String) {
+           DateTime d = DateTime.parse(syncData['date']);
+           // If it doesn't end with Z, assume it's local
+           if (!syncData['date'].endsWith('Z')) {
+              syncData['date'] = d.toUtc().toIso8601String();
+           }
+        }
         
         final response = await _apiService.dio.post('/water', data: syncData);
         if (response.statusCode == 200 || response.statusCode == 201) {

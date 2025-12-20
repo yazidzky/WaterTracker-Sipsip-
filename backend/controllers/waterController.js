@@ -32,11 +32,19 @@ const logIntake = async (req, res) => {
 // @access  Private
 const getTodayIntake = async (req, res) => {
     try {
-        const startOfDay = new Date();
-        startOfDay.setHours(0, 0, 0, 0);
+        const { startDate, endDate } = req.query;
+        let startOfDay, endOfDay;
 
-        const endOfDay = new Date();
-        endOfDay.setHours(23, 59, 59, 999);
+        if (startDate && endDate) {
+            startOfDay = new Date(startDate);
+            endOfDay = new Date(endDate);
+        } else {
+            startOfDay = new Date();
+            startOfDay.setHours(0, 0, 0, 0);
+
+            endOfDay = new Date();
+            endOfDay.setHours(23, 59, 59, 999);
+        }
 
         const intakes = await WaterIntake.find({
             user: req.user.id,
@@ -67,10 +75,10 @@ const getStats = async (req, res) => {
             // Custom range (e.g., for specific week)
             // Ensure we cover the full day of endDate
             const start = new Date(startDate);
-            start.setHours(0, 0, 0, 0);
+            // start.setHours(0, 0, 0, 0);
 
             const end = new Date(endDate);
-            end.setHours(23, 59, 59, 999);
+            // end.setHours(23, 59, 59, 999);
 
             query.date = { $gte: start, $lte: end };
         } else {
