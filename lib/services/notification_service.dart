@@ -13,9 +13,20 @@ export 'package:watertracker/widgets/custom_notification_widget.dart' show Notif
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'dart:math';
 
+import 'package:permission_handler/permission_handler.dart';
+
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print("Handling a background message: ${message.messageId}");
+}
+
+@pragma('vm:entry-point')
+void notificationTapBackground(NotificationResponse notificationResponse) {
+  print('notification(${notificationResponse.id}) action tapped: '
+      '${notificationResponse.actionId} with payload: ${notificationResponse.payload}');
+  if (notificationResponse.actionId == 'stop_alarm') {
+    NotificationService().cancelNotification(notificationResponse.id ?? 0);
+  }
 }
 
 class NotificationService {
@@ -68,26 +79,33 @@ class NotificationService {
           initializationSettings,
           onDidReceiveNotificationResponse: (details) {
             // Handle notification tap
+            print('Foreground notification tapped: ${details.payload}');
+            // Always cancel the notification to stop the insistent sound
+            if (details.id != null) {
+              cancelNotification(details.id!);
+            }
           },
+          onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
         );
         print('Local notifications initialized');
 
         final AndroidNotificationChannel channel = AndroidNotificationChannel(
-          'water_reminder_channel',
+          'water_reminder_channel_v2', // Changed ID to apply new settings
           'Water Reminders',
           description: 'Reminders to drink water',
           importance: Importance.max,
           playSound: true,
           enableVibration: true,
-          vibrationPattern: Int64List.fromList([0, 500, 200, 500]),
+          vibrationPattern: Int64List.fromList([0, 1000, 500, 1000]), // Longer vibration
           enableLights: true,
           showBadge: true,
+          audioAttributesUsage: AudioAttributesUsage.alarm, // Critical for bypassing silent mode
         );
 
         await flutterLocalNotificationsPlugin
             .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
             ?.createNotificationChannel(channel);
-        print('Android notification channel created and configured');
+        print('Android notification channel created and configured (v2)');
       } else {
         print('Platform is Web, skipping mobile-only local notification setup');
       }
@@ -102,6 +120,11 @@ class NotificationService {
       }
     } catch (e) {
       print('Error during NotificationService.init(): $e');
+    }
+    try {
+      await rescheduleAllReminders();
+    } catch (e) {
+      print('Reschedule on init error: $e');
     }
     print('NotificationService.init() complete');
   }
@@ -145,7 +168,7 @@ class NotificationService {
 
     return NotificationDetails(
       android: AndroidNotificationDetails(
-        'water_reminder_channel',
+        'water_reminder_channel_v2', // Updated ID
         'Water Reminders',
         channelDescription: 'Reminders to drink water',
         importance: Importance.max,
@@ -155,11 +178,23 @@ class NotificationService {
         category: AndroidNotificationCategory.alarm,
         fullScreenIntent: true,
         audioAttributesUsage: AudioAttributesUsage.alarm,
+        visibility: NotificationVisibility.public, // Show on lock screen
+        additionalFlags: Int32List.fromList(<int>[4]), // FLAG_INSISTENT = 4
+        styleInformation: const BigTextStyleInformation(''),
+        actions: <AndroidNotificationAction>[
+          const AndroidNotificationAction(
+            'stop_alarm',
+            'Matikan',
+            showsUserInterface: true,
+            cancelNotification: true,
+          ),
+        ],
       ),
       iOS: DarwinNotificationDetails(
         presentAlert: true,
         presentBadge: true,
         presentSound: playSound,
+        interruptionLevel: InterruptionLevel.critical, // Try to break through focus modes
       ),
     );
   }
@@ -176,15 +211,23 @@ class NotificationService {
 
   Future<void> requestPermissions() async {
     // Request Local Notification Permissions
-    // Request Exact Alarm Permissions (Android 13+)
     try {
       final androidImplementation = flutterLocalNotificationsPlugin
           .resolvePlatformSpecificImplementation<
               AndroidFlutterLocalNotificationsPlugin>();
+      
       if (androidImplementation != null) {
         await androidImplementation.requestNotificationsPermission();
-        await androidImplementation.requestExactAlarmsPermission();
       }
+
+      // Check and request SCHEDULE_EXACT_ALARM permission for Android 12+
+      if (await Permission.scheduleExactAlarm.isDenied) {
+         print('Requesting scheduleExactAlarm permission');
+         await Permission.scheduleExactAlarm.request();
+      }
+
+      await androidImplementation?.requestExactAlarmsPermission();
+
     } catch (e) {
       print('Android permission request error: $e');
     }
@@ -197,6 +240,16 @@ class NotificationService {
           badge: true,
           sound: true,
         );
+
+    // Request Battery Optimization Ignore (Critical for reliable alarms)
+    try {
+      if (await Permission.ignoreBatteryOptimizations.isDenied) {
+         print('Requesting ignoreBatteryOptimizations permission');
+         await Permission.ignoreBatteryOptimizations.request();
+      }
+    } catch (e) {
+      print('Battery optimization request error: $e');
+    }
 
     // Request Firebase Messaging Permissions
     try {
@@ -341,6 +394,10 @@ class NotificationService {
 
   Future<void> cancelAll() async {
     await flutterLocalNotificationsPlugin.cancelAll();
+  }
+
+  Future<void> cancelNotification(int id) async {
+    await flutterLocalNotificationsPlugin.cancel(id);
   }
 
   // --- In-App Overlay Notification ---
