@@ -37,10 +37,16 @@ class NotificationService {
   Future<void> init() async {
     print('NotificationService.init() started');
     try {
-      final String timeZoneName = await FlutterTimezone.getLocalTimezone();
-      tz.initializeTimeZones();
-      tz.setLocalLocation(tz.getLocation(timeZoneName));
-      print('Timezones initialized: $timeZoneName');
+      try {
+        final String timeZoneName = await FlutterTimezone.getLocalTimezone();
+        tz.initializeTimeZones();
+        tz.setLocalLocation(tz.getLocation(timeZoneName));
+        print('Timezones initialized: $timeZoneName');
+      } catch (e) {
+        print('Timezone initialization error: $e');
+        // Fallback to UTC or don't set location
+        tz.initializeTimeZones();
+      }
 
       if (!kIsWeb) {
         const AndroidInitializationSettings initializationSettingsAndroid =

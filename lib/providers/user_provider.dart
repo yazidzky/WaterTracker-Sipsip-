@@ -36,24 +36,28 @@ class UserProvider with ChangeNotifier {
   }
 
   Future<void> _loadLocalUserData() async {
-    // 1. Load from Hive
-    _profile = LocalStorageService.getUserProfile();
-    
-    final localIntakes = LocalStorageService.getTodayIntakes();
-    _currentWater = localIntakes.fold<int>(0, (sum, item) => sum + (item['amount'] as int));
-    _intakeHistory = localIntakes;
+    try {
+      // 1. Load from Hive
+      _profile = LocalStorageService.getUserProfile();
+      
+      final localIntakes = LocalStorageService.getTodayIntakes();
+      _currentWater = localIntakes.fold<int>(0, (sum, item) => sum + (item['amount'] as int));
+      _intakeHistory = localIntakes;
 
-    // 2. Load Wake/Sleep times from SharedPreferences (matching ReminderScreen keys)
-    final prefs = await SharedPreferences.getInstance();
-    final startHour = prefs.getInt('reminder_start_hour') ?? 7;
-    final startMinute = prefs.getInt('reminder_start_minute') ?? 0;
-    final endHour = prefs.getInt('reminder_end_hour') ?? 21;
-    final endMinute = prefs.getInt('reminder_end_minute') ?? 30;
-    
-    _wakeTime = "${startHour.toString().padLeft(2, '0')}:${startMinute.toString().padLeft(2, '0')}";
-    _sleepTime = "${endHour.toString().padLeft(2, '0')}:${endMinute.toString().padLeft(2, '0')}";
-    
-    notifyListeners();
+      // 2. Load Wake/Sleep times from SharedPreferences (matching ReminderScreen keys)
+      final prefs = await SharedPreferences.getInstance();
+      final startHour = prefs.getInt('reminder_start_hour') ?? 7;
+      final startMinute = prefs.getInt('reminder_start_minute') ?? 0;
+      final endHour = prefs.getInt('reminder_end_hour') ?? 21;
+      final endMinute = prefs.getInt('reminder_end_minute') ?? 30;
+      
+      _wakeTime = "${startHour.toString().padLeft(2, '0')}:${startMinute.toString().padLeft(2, '0')}";
+      _sleepTime = "${endHour.toString().padLeft(2, '0')}:${endMinute.toString().padLeft(2, '0')}";
+      
+      notifyListeners();
+    } catch (e) {
+      print('Error loading local user data: $e');
+    }
   }
 
   Future<void> refreshAll() async {

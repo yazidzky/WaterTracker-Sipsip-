@@ -21,45 +21,50 @@ void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
+  // Initialize Local Storage (Critical)
   try {
-    print('Initialization started...');
-    
+    await LocalStorageService.init();
+    print('Hive initialized');
+  } catch (e) {
+    print('CRITICAL: Hive initialization failed: $e');
+  }
+
+  // Initialize Firebase
+  try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
     print('Firebase initialized');
+  } catch (e) {
+    print('Firebase initialization error: $e');
+  }
 
-    await LocalStorageService.init();
-    print('Hive initialized');
-    
+  // Initialize Date Formatting
+  try {
     await initializeDateFormatting('id_ID', null);
     print('Date formatting initialized');
-    
+  } catch (e) {
+    print('Date formatting initialization error: $e');
+  }
+
+  // Initialize Notifications
+  try {
     await NotificationService().init();
     print('Notification service initialized');
-    
-    runApp(
-      MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (_) => ThemeProvider()),
-          ChangeNotifierProvider(create: (_) => UserProvider()),
-        ],
-        child: const MyApp(),
-      ),
-    );
-    print('App started');
   } catch (e) {
-    print('Initialization error: $e');
-    FlutterNativeSplash.remove(); 
-    runApp(
-      MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        ],
-        child: const MyApp(),
-      ),
-    );
+    print('Notification service initialization error: $e');
   }
+
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
+  print('App started');
 }
 
 class MyApp extends StatelessWidget {

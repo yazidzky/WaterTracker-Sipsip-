@@ -6,6 +6,7 @@ class ReminderModel {
   int amount;
   String status; // 'Selesai', 'Terlewat', 'Nanti'
   String icon;
+  String? intakeId;
 
   ReminderModel({
     required this.id,
@@ -13,6 +14,7 @@ class ReminderModel {
     required this.amount,
     this.status = 'Nanti',
     this.icon = 'Cup_Filled.svg',
+    this.intakeId,
   });
 
   Map<String, dynamic> toJson() => {
@@ -21,6 +23,7 @@ class ReminderModel {
     'amount': amount,
     'status': status,
     'icon': icon,
+    'intakeId': intakeId,
   };
 
   factory ReminderModel.fromJson(Map<String, dynamic> json) => ReminderModel(
@@ -29,6 +32,7 @@ class ReminderModel {
     amount: json['amount'],
     status: json['status'],
     icon: json['icon'],
+    intakeId: json['intakeId'],
   );
 }
 

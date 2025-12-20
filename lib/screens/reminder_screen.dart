@@ -68,10 +68,16 @@ class _ReminderScreenState extends State<ReminderScreen> {
         setState(() {
           if (intakeData != null) {
             int fetchedIntake = intakeData['totalAmount'] ?? 0;
-            if (fetchedIntake != _currentWater) {
-              _currentWater = fetchedIntake;
-              _generateNewSchedule();
-              _saveSettings();
+            // Only regenerate if reminders are empty (first run)
+            // or if we decide to implement smarter sync.
+            // For now, prioritize existing reminders to avoid reset loop.
+            if (_reminders.isEmpty) {
+               _currentWater = fetchedIntake;
+               _generateNewSchedule();
+               _saveSettings();
+            } else {
+               // Update current water display but do NOT reset reminders
+               _currentWater = fetchedIntake;
             }
           }
           if (userProfile != null) {
@@ -84,7 +90,9 @@ class _ReminderScreenState extends State<ReminderScreen> {
              
              if (fetchedGoal != _goalWater) {
                _goalWater = fetchedGoal;
-               _generateNewSchedule();
+               if (_reminders.isEmpty) {
+                  _generateNewSchedule();
+               }
                _saveSettings(); // Auto-sync to storage and alarms
              }
           }
@@ -115,7 +123,14 @@ class _ReminderScreenState extends State<ReminderScreen> {
       _intervalMinutes = savedMinutes == -1 ? null : savedMinutes;
       
       // Load actual reminders
-      final List<String>? storedReminders = prefs.getStringList('reminders_list');
+      final String? savedDate = prefs.getString('reminders_date');
+      final String todayDate = DateTime.now().toIso8601String().split('T')[0];
+      
+      List<String>? storedReminders;
+      if (savedDate == todayDate) {
+         storedReminders = prefs.getStringList('reminders_list');
+      }
+
       if (storedReminders != null && storedReminders.isNotEmpty) {
         try {
           _reminders = storedReminders
@@ -163,6 +178,8 @@ class _ReminderScreenState extends State<ReminderScreen> {
       // Save reminders list
       List<String> reminderStrings = _reminders.map((r) => jsonEncode(r.toJson())).toList();
       await prefs.setStringList('reminders_list', reminderStrings);
+      // Save date to ensure we reset on new day
+      await prefs.setString('reminders_date', DateTime.now().toIso8601String().split('T')[0]);
       print('DEBUG: Saved ${reminderStrings.length} reminders to SharedPreferences');
 
       // Request permissions and schedule
@@ -801,7 +818,16 @@ class _ReminderScreenState extends State<ReminderScreen> {
           ),
           const SizedBox(width: 16),
           GestureDetector(
-            onTap: () {
+            onTap: () async {
+              final reminder = _reminders[index];
+              if (reminder.status == 'Selesai' && reminder.intakeId != null) {
+                 await _waterService.deleteIntake(reminder.intakeId!);
+                 setState(() {
+                    _currentWater -= reminder.amount;
+                    if (_currentWater < 0) _currentWater = 0;
+                 });
+              }
+
               setState(() {
                 _reminders.removeAt(index);
                 if (_reminders.isNotEmpty) {
@@ -809,6 +835,7 @@ class _ReminderScreenState extends State<ReminderScreen> {
                    _reminders = _reminderService.rebalanceReminders(_reminders, _goalWater, lastIdx);
                 }
               });
+              await _saveSettings();
             },
             child: SvgPicture.asset(
               'assets/images/ic_delete.svg',
@@ -869,13 +896,43 @@ class _ReminderScreenState extends State<ReminderScreen> {
   }
 
   Future<void> _toggleStatus(int index) async {
+    final reminder = _reminders[index];
+    final bool isMarkingAsDone = reminder.status != 'Selesai';
+
     setState(() {
-      if (_reminders[index].status == 'Selesai') {
-        _reminders[index].status = 'Nanti'; // Will resolve to Terlewat or Nanti via _getDisplayStatus
-      } else {
-        _reminders[index].status = 'Selesai';
-      }
+      _reminders[index].status = isMarkingAsDone ? 'Selesai' : 'Nanti';
     });
+
+    try {
+      if (isMarkingAsDone) {
+        // Log intake
+        final result = await _waterService.logIntake(reminder.amount, 'water');
+        if (result != null) {
+          if (result.containsKey('id')) {
+             _reminders[index].intakeId = result['id'];
+          } else if (result.containsKey('local_key')) {
+             _reminders[index].intakeId = result['local_key']; // Use local key if offline
+          }
+        }
+        
+        setState(() {
+          _currentWater += reminder.amount;
+        });
+      } else {
+        // Undo log
+        if (reminder.intakeId != null) {
+          await _waterService.deleteIntake(reminder.intakeId!);
+          _reminders[index].intakeId = null;
+        }
+        setState(() {
+           _currentWater -= reminder.amount;
+           if (_currentWater < 0) _currentWater = 0;
+        });
+      }
+    } catch (e) {
+      print("Error toggling status: $e");
+    }
+
     await _saveSettings();
   }
 }
