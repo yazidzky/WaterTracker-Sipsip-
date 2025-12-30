@@ -148,7 +148,7 @@ Anda disarankan untuk meninjau Kebijakan Privasi ini secara berkala untuk setiap
 
 Jika Anda memiliki pertanyaan atau kekhawatiran tentang Kebijakan Privasi ini, silakan hubungi kami:
 
-- **Email:** [yazidzinky98@gmail.com]
+- **Email:** yazidzinky98@gmail.com
 
 ---
 
