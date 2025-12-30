@@ -158,4 +158,4 @@ Dengan menggunakan aplikasi SipSip Water Tracker, Anda menyatakan bahwa Anda tel
 
 ---
 
-**© 2024 SipSip Water Tracker. All rights reserved.**
+**© 2025 SipSip Water Tracker. All rights reserved.**
