@@ -470,6 +470,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                           maxY: _getDynamicMaxY(userProvider.dailyGoal.toDouble()),
                           barTouchData: BarTouchData(
                             enabled: true,
+                            handleBuiltInTouches: true,
                             touchTooltipData: BarTouchTooltipData(
                               tooltipBgColor: Colors.transparent,
                               tooltipPadding: EdgeInsets.zero,
@@ -479,21 +480,15 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                               },
                             ),
                             touchCallback: (FlTouchEvent event, barTouchResponse) {
-                              if (!event.isInterestedForInteractions ||
-                                  barTouchResponse == null ||
-                                  barTouchResponse.spot == null) {
-                                return;
-                              }
-                              if (event is FlTapUpEvent) {
-                                setState(() {
-                                  if (_toggleIndex == 0) {
-                                    _selectedDayIndex = barTouchResponse.spot!.touchedBarGroupIndex;
-                                  } else {
-                                    // Monthly view - select week
-                                    _selectedWeekIndex = barTouchResponse.spot!.touchedBarGroupIndex;
-                                  }
-                                });
-                              }
+                              final spot = barTouchResponse?.spot;
+                              if (spot == null) return;
+                              setState(() {
+                                if (_toggleIndex == 0) {
+                                  _selectedDayIndex = spot.touchedBarGroupIndex;
+                                } else {
+                                  _selectedWeekIndex = spot.touchedBarGroupIndex;
+                                }
+                              });
                             },
                           ),
                           titlesData: FlTitlesData(
@@ -507,7 +502,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                        axisSide: meta.axisSide,
                                        child: Text(
                                           "M${value.toInt() + 1}", 
-                                          style: const TextStyle(color: Colors.grey, fontSize: 10)
+                                          style: TextStyle(
+                                            color: value.toInt() == _selectedWeekIndex ? const Color(0xFF2FA2D6) : Colors.grey,
+                                            fontSize: 12,
+                                            fontWeight: value.toInt() == _selectedWeekIndex ? FontWeight.bold : FontWeight.normal,
+                                          ),
                                        ),
                                      );
                                   }
@@ -602,6 +601,16 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 // Unified Detail Container (Arc Progress + Intake List)
                 _buildUnifiedDetailCard(_selectedDayIndex, localized, isDark, userProvider.dailyGoal),
               ] else ...[
+                Text(
+                  "Detail Minggu M${_selectedWeekIndex + 1}",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: textColor,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _buildMonthlyWeekDetailCard(_selectedWeekIndex, localized, isDark, userProvider.dailyGoal),
                  // MONTHLY HABITS & HIGHLIGHTS
                  Text(localized.translate('habits'), style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: textColor)),
                  const SizedBox(height: 12),
@@ -614,16 +623,16 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                      _buildHabitPill(localized.translate('night'), _nightPct, isDark ? Colors.blue.withOpacity(0.2) : Colors.blue.shade100, Colors.blue),
                    ],
                  ),
-                 const SizedBox(height: 20),
-                 Text(localized.translate('highlights'), style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: textColor)),
-                 const SizedBox(height: 12),
-                 Row(
-                   children: [
-                     Expanded(child: _buildHighlightCard(localized.translate('longestStreak'), "$_longestStreak hari", "assets/images/ic_fire.svg", isDark ? const Color(0xFF4E342E) : const Color(0xFFFFCCBC), isDark)),
-                     const SizedBox(width: 12),
-                     Expanded(child: _buildHighlightCard(localized.translate('bestHydration'), "${(_bestHydration / 1000).toStringAsFixed(3).replaceFirst('.', '.')}ml", "assets/images/ic_star.svg", isDark ? const Color(0xFF424242) : const Color(0xFFFFF9C4), isDark)),
-                   ],
-                 ),
+                const SizedBox(height: 20),
+                Text(localized.translate('highlights'), style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: textColor)),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(child: _buildHighlightCard(localized.translate('longestStreak'), "$_longestStreak hari", "assets/images/ic_fire.svg", isDark ? const Color(0xFF4E342E) : const Color(0xFFFFCCBC), isDark)),
+                    const SizedBox(width: 12),
+                    Expanded(child: _buildHighlightCard(localized.translate('bestHydration'), "${(_bestHydration / 1000).toStringAsFixed(3).replaceFirst('.', '.')}ml", "assets/images/ic_star.svg", isDark ? const Color(0xFF424242) : const Color(0xFFFFF9C4), isDark)),
+                  ],
+                ),
               ],
               const SizedBox(height: 100), // Extra space for scrolling to analysis section
             ],
@@ -637,6 +646,70 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     DateTime now = DateTime.now();
     DateTime startOfThisWeek = DateTime(now.year, now.month, now.day).subtract(Duration(days: now.weekday - 1));
     return _currentWeekStart.isAtSameMomentAs(startOfThisWeek);
+  }
+
+  Widget _buildMonthlyWeekDetailCard(int weekIndex, AppLocalizations localized, bool isDark, int dailyGoal) {
+    final daysInMonth = DateTime(_selectedMonthDate.year, _selectedMonthDate.month + 1, 0).day;
+    final startDay = (weekIndex * 7) + 1;
+    final endDay = (startDay + 6) > daysInMonth ? daysInMonth : (startDay + 6);
+    final List<DateTime> days = List.generate(endDay - startDay + 1, (i) => DateTime(_selectedMonthDate.year, _selectedMonthDate.month, startDay + i));
+    final Map<String, int> totals = {};
+    for (var item in _rawIntakes) {
+      final d = DateTime.parse(item['date']).toLocal();
+      if (d.month == _selectedMonthDate.month && d.year == _selectedMonthDate.year && d.day >= startDay && d.day <= endDay) {
+        final key = DateFormat('yyyy-MM-dd').format(d);
+        totals[key] = (totals[key] ?? 0) + (item['amount'] as num).toInt();
+      }
+    }
+    final int sum = totals.values.fold(0, (a, b) => a + b);
+    final double avg = days.isNotEmpty ? sum / days.length : 0;
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5)),
+        ],
+      ),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("${sum}ml", style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Color(0xFF2FA2D6))),
+                      const SizedBox(height: 2),
+                      Text("${localized.translate('dailyAverage')}: ${avg.toInt()}ml", style: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+                ),
+                Text("${dailyGoal > 0 ? ((sum / (days.length * dailyGoal)) * 100).clamp(0, 100).toInt() : 0}%", style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: isDark ? Colors.white : const Color(0xFF1D3557))),
+              ],
+            ),
+          ),
+          Divider(height: 1, thickness: 1, color: Colors.grey.shade200, indent: 20, endIndent: 20),
+          ...days.asMap().entries.map((entry) {
+            final date = entry.value;
+            final key = DateFormat('yyyy-MM-dd').format(date);
+            final amount = totals[key] ?? 0;
+            return Padding(
+              padding: EdgeInsets.fromLTRB(20, 12, 20, entry.key == days.length - 1 ? 16 : 12),
+              child: Row(
+                children: [
+                  Text(DateFormat('d MMM').format(date), style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: isDark ? Colors.white : const Color(0xFF1D3557))),
+                  const Spacer(),
+                  Text("$amount ml", style: TextStyle(color: isDark ? Colors.white : const Color(0xFF1D3557), fontWeight: FontWeight.w600, fontSize: 16)),
+                ],
+              ),
+            );
+          }).toList(),
+        ],
+      ),
+    );
   }
 
   double _calculateDayProgress(int dayIndex, int dailyGoal) {

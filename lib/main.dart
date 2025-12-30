@@ -16,6 +16,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
 import 'package:watertracker/services/local_storage_service.dart';
+import 'dart:math' as math;
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -157,11 +158,17 @@ class _InitialScreenState extends State<InitialScreen> {
     // Show splash logo with blue background for seamless transition (fallback)
     return Scaffold(
       backgroundColor: const Color(0xFF3BAFDA),
-      body: Center(
-        child: SvgPicture.asset(
-          'assets/images/ic_splashscreen.svg',
-          width: 200,
-        ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final shortestSide = math.min(constraints.maxWidth, constraints.maxHeight);
+          final size = (shortestSide * 0.4).clamp(120.0, 480.0).toDouble();
+          return Center(
+            child: SvgPicture.asset(
+              'assets/images/ic_splashscreen.svg',
+              width: size,
+            ),
+          );
+        },
       ),
     );
   }
