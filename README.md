@@ -84,7 +84,7 @@ Dibalik aplikasi hebat, ada tim yang luar biasa. Kenalan yuk dengan kami!
       <td align="center">
         <img src="assets/images/yazid(107).jpg" width="100" height="100" style="border-radius: 50%; object-fit: cover; border: 3px solid #0175C2;" alt="Yazid"><br>
         <b>Yazid</b><br>
-        <sub>1237050107/sub>
+        <sub>1237050107</sub>
       </td>
       <td align="center">
         <img src="assets/images/fahmi(074).jpg" width="100" height="100" style="border-radius: 50%; object-fit: cover; border: 3px solid #0175C2;" alt="Fahmi"><br>
