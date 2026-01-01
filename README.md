@@ -1,6 +1,21 @@
-# watertracker
+# SipSip Water Tracker
 
-A new Flutter project.
+## Our Team
+
+| ![Yazid](assets/images/yazid(107).jpg) | ![Fahmi](assets/images/fahmi(074).jpg) | ![Dyo](assets/images/Dyo(076).jpg) | Keanu |
+| :---: | :---: | :---: | :---: |
+| **Yazid** | **Fahmi** | **Dyo** | **Keanu** |
+
+<br>
+
+A new Flutter project designed to help you track your daily water intake and stay hydrated.
+
+## Features
+
+- **Hydration Goal Setting**: Set your daily water intake goals based on your personal needs.
+- **Daily Tracking**: Easily log your water consumption throughout the day.
+- **Reminders**: Get timely notifications to remind you to drink water.
+- **History & Statistics**: View your hydration history and track your progress over time.
 
 ## Getting Started
 
