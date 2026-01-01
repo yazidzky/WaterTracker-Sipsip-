@@ -97,7 +97,7 @@ Dibalik aplikasi hebat, ada tim yang luar biasa. Kenalan yuk dengan kami!
         <sub>Mobile Developer</sub>
       </td>
       <td align="center">
-        <img src="assets/images/keanu(061).svg" width="100" height="100" style="border-radius: 50%; object-fit: cover; border: 3px solid #0175C2;" alt="Keanu"><br>
+        <img src="assets/images/keanu(061).jpg" width="100" height="100" style="border-radius: 50%; object-fit: cover; border: 3px solid #0175C2;" alt="Keanu"><br>
         <b>Keanu</b><br>
         <sub>Mobile Developer</sub>
       </td>
