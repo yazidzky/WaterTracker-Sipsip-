@@ -265,69 +265,78 @@ class NotificationService {
   }
 
   Future<void> scheduleRemindersList(dynamic reminders) async {
-    if (kIsWeb) {
-      print('Platform is Web, skipping local notification scheduling');
-      return;
-    }
-    
-    await cancelAll();
-    int id = 0;
-
-    final List<Map<String, String>> templates = [
-      {
-        'title': 'Minum dulu ga sih 😗',
-        'body': 'Sedikit air sekarang, fokus lebih stabil nanti. SipSip nemenin kamu kok.'
-      },
-      {
-        'title': 'Teman-sip dateng~',
-        'body': 'Aku ngingetin dengan lembut yaa, jangan lupa minum air \u2665'
-      },
-      {
-        'title': 'Waktunya rehat sebentar \ud83d\udca7',
-        'body': 'Satu dua teguk air bisa bantu badan kamu lebih siap lanjut lagi.'
-      },
-      {
-        'title': 'Hari ini panas banget gak sih, Teman-sip? \ud83e\udd75',
-        'body': 'Yuk minum dulu sebentar, biar badan kamu tetap seger dan ga ikut kepanasan \ud83d\ude09'
-      },
-      {
-        'title': 'Bestie check \ud83d\udca6',
-        'body': 'SipSip mau pastiin kamu ga lupa minum hari ini.'
-      },
-    ];
-
-    final random = Random();
-
-    for (var reminder in reminders) {
-      String time;
-      if (reminder is Map) {
-        time = reminder['time'];
-      } else {
-        time = reminder.time;
+    try {
+      if (kIsWeb) {
+        print('Platform is Web, skipping local notification scheduling');
+        return;
       }
       
-      final timeParts = time.split(':');
-      final hour = int.parse(timeParts[0]);
-      final minute = int.parse(timeParts[1]);
+      await cancelAll();
+      int id = 0;
 
-      // Pick a random template
-      final template = templates[random.nextInt(templates.length)];
-      
-      String title = template['title']!;
-      String body = template['body']!;
+      final List<Map<String, String>> templates = [
+        {
+          'title': 'Minum dulu ga sih 😗',
+          'body': 'Sedikit air sekarang, fokus lebih stabil nanti. SipSip nemenin kamu kok.'
+        },
+        {
+          'title': 'Teman-sip dateng~',
+          'body': 'Aku ngingetin dengan lembut yaa, jangan lupa minum air \u2665'
+        },
+        {
+          'title': 'Waktunya rehat sebentar \ud83d\udca7',
+          'body': 'Satu dua teguk air bisa bantu badan kamu lebih siap lanjut lagi.'
+        },
+        {
+          'title': 'Hari ini panas banget gak sih, Teman-sip? \ud83e\udd75',
+          'body': 'Yuk minum dulu sebentar, biar badan kamu tetap seger dan ga ikut kepanasan \ud83d\ude09'
+        },
+        {
+          'title': 'Bestie check \ud83d\udca6',
+          'body': 'SipSip mau pastiin kamu ga lupa minum hari ini.'
+        },
+      ];
 
-      // Custom logic: If it's the first reminder and we want to show the goal (mocked example)
-      if (id == 0) {
-        title = '\ud83d\udca7 Target minum harianmu sedang menanti!';
-        body = 'Air membantu kamu untuk terus semangat menjalani harimu. Tingkatkan fokusmu dengan minum air yang cukup Teman-sip! \ud83d\ude09';
+      final random = Random();
+
+      for (var reminder in reminders) {
+        String time;
+        if (reminder is Map) {
+          time = reminder['time'];
+        } else {
+          time = reminder.time;
+        }
+        
+        final timeParts = time.split(':');
+        final hour = int.parse(timeParts[0]);
+        final minute = int.parse(timeParts[1]);
+
+        // Pick a random template
+        final template = templates[random.nextInt(templates.length)];
+        
+        String title = template['title']!;
+        String body = template['body']!;
+
+        // Custom logic: If it's the first reminder and we want to show the goal (mocked example)
+        if (id == 0) {
+          title = '\ud83d\udca7 Target minum harianmu sedang menanti!';
+          body = 'Air membantu kamu untuk terus semangat menjalani harimu. Tingkatkan fokusmu dengan minum air yang cukup Teman-sip! \ud83d\ude09';
+        }
+        
+        await _scheduleDailyNotification(
+          id++,
+          title,
+          body,
+          TimeOfDay(hour: hour, minute: minute),
+        );
       }
-      
-      await _scheduleDailyNotification(
-        id++,
-        title,
-        body,
-        TimeOfDay(hour: hour, minute: minute),
-      );
+    } catch (e) {
+      print('CRITICAL ERROR in scheduleRemindersList: $e');
+      // Do not throw, keep silent to avoid crashing UI/Update Failed msg?
+      // Or throw if we want UI to know? The UI shows "Update Gagal" if this fails.
+      // But we handled inner errors. If cancelAll fails, that's bad.
+      // Re-throwing allows valid failure feedback, but let's log it heavily.
+      rethrow; 
     }
   }
 
@@ -349,9 +358,27 @@ class NotificationService {
             UILocalNotificationDateInterpretation.absoluteTime,
         matchDateTimeComponents: DateTimeComponents.time,
       );
-      print('DEBUG: Successfully scheduled ID: $id');
+      print('DEBUG: Successfully scheduled ID: $id (Exact)');
     } catch (e) {
-      print('DEBUG: Error scheduling ID: $id - $e');
+      print('DEBUG: Error scheduling exact alarm ID: $id - $e');
+      // Fallback to Inexact Alarm if Exact is denied or fails
+      try {
+        print('DEBUG: Attempting fallback to Inexact Alarm for ID: $id');
+        await flutterLocalNotificationsPlugin.zonedSchedule(
+          id,
+          title,
+          body,
+          scheduledTime,
+          details,
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.absoluteTime,
+          matchDateTimeComponents: DateTimeComponents.time,
+        );
+        print('DEBUG: Successfully scheduled ID: $id (Inexact Fallback)');
+      } catch (e2) {
+        print('DEBUG: Error scheduling inexact fallback ID: $id - $e2');
+      }
     }
   }
 

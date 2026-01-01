@@ -161,8 +161,8 @@ class UserProvider with ChangeNotifier {
     await prefs.setInt('reminder_start_hour', int.parse(parts[0]));
     await prefs.setInt('reminder_start_minute', int.parse(parts[1]));
     
-    // Auto-reschedule notifications if times change
-    await NotificationService().rescheduleAllReminders();
+    // Notification rescheduling is now handled by the UI controller (ReminderScreen/ProfileScreen)
+    // to avoid redundant multiple calls during batch updates.
     
     notifyListeners();
   }
@@ -174,8 +174,7 @@ class UserProvider with ChangeNotifier {
     await prefs.setInt('reminder_end_hour', int.parse(parts[0]));
     await prefs.setInt('reminder_end_minute', int.parse(parts[1]));
     
-    // Auto-reschedule notifications if times change
-    await NotificationService().rescheduleAllReminders();
+    // Notification rescheduling is now handled by the UI controller (ReminderScreen/ProfileScreen)
     
     notifyListeners();
   }

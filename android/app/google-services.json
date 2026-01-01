@@ -14,11 +14,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "387859511366-g4cmephlbue77m4vl4c6ov1g54mqgrnc.apps.googleusercontent.com",
+          "client_id": "387859511366-douafmbajl6fvr0qocje1jomno3i2e3g.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.watertracker",
-            "certificate_hash": "a0467d29bb2b918f8f3d9da06305e0040b335e1f"
+            "certificate_hash": "6f198b1fa8e620f9e2a072a86d55d6e93a84e9a8"
           }
         },
         {
@@ -58,47 +58,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "387859511366-krof544ah846du71jektnh7vh8r8vdcd.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyB2XEcytvvf7udd5f1_c2t6XsjFAN7rUG0"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "387859511366-krof544ah846du71jektnh7vh8r8vdcd.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "387859511366-3hu8iigg7sj9h472dbohbmjbsppsohv5.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.example.watertracker"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:387859511366:android:468d0c38d83221ae6bb247",
-        "android_client_info": {
-          "package_name": "com.watertracker.sipsip"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "387859511366-1aljse3l845t0pqul1ji8ts7ibqedtcs.apps.googleusercontent.com",
+          "client_id": "387859511366-bpvm8rsq0oi6n6di1d6pv9eauq8ur7gn.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.watertracker.sipsip",
-            "certificate_hash": "a0467d29bb2b918f8f3d9da06305e0040b335e1f"
+            "package_name": "com.sipsip.watertracker",
+            "certificate_hash": "6f198b1fa8e620f9e2a072a86d55d6e93a84e9a8"
           }
         },
         {
