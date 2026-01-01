@@ -84,22 +84,22 @@ Dibalik aplikasi hebat, ada tim yang luar biasa. Kenalan yuk dengan kami!
       <td align="center">
         <img src="assets/images/yazid(107).jpg" width="100" height="100" style="border-radius: 50%; object-fit: cover; border: 3px solid #0175C2;" alt="Yazid"><br>
         <b>Yazid</b><br>
-        <sub>Mobile Developer</sub>
+        <sub>1237050107/sub>
       </td>
       <td align="center">
         <img src="assets/images/fahmi(074).jpg" width="100" height="100" style="border-radius: 50%; object-fit: cover; border: 3px solid #0175C2;" alt="Fahmi"><br>
         <b>Fahmi</b><br>
-        <sub>Mobile Developer</sub>
+        <sub>1237050074</sub>
       </td>
       <td align="center">
         <img src="assets/images/Dyo(076).jpg" width="100" height="100" style="border-radius: 50%; object-fit: cover; border: 3px solid #0175C2;" alt="Dyo"><br>
         <b>Dyo</b><br>
-        <sub>Mobile Developer</sub>
+        <sub>1237050076</sub>
       </td>
       <td align="center">
         <img src="assets/images/keanu(061).jpg" width="100" height="100" style="border-radius: 50%; object-fit: cover; border: 3px solid #0175C2;" alt="Keanu"><br>
         <b>Keanu</b><br>
-        <sub>Mobile Developer</sub>
+        <sub>1237050061</sub>
       </td>
     </tr>
   </table>
